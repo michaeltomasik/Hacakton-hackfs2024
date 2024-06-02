@@ -353,7 +353,7 @@ const App = () => {
       </Section>
 
       <Section>
-        <SectionTitle>Fetch PDF from Filecoin IPFS and Decrypt It</SectionTitle>
+        <SectionTitle>Fetch PDF from Filecoin IPFS & Decrypt it with Lit Actions</SectionTitle>
         <TextInput
           type="text"
           value={fileHash}
