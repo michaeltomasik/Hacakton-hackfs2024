@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
-import { LitNodeClient } from "@lit-protocol/lit-node-client";
+import styled from 'styled-components';
+
 import {
   LitActionResource,
   LitAccessControlConditionResource,
   LitAbility,
   createSiweMessageWithRecaps,
   generateAuthSig,
-  LitPKPResource,
 } from '@lit-protocol/auth-helpers';
 import { ABI } from './abi';
 import { LitNetwork } from "@lit-protocol/constants";
@@ -16,6 +16,89 @@ import lighthouse from '@lighthouse-web3/sdk';
 import extractTextFromPDF from 'pdf-parser-client-side';
 import InsuranceBot from './InsuranceBot';
 import './App.css';
+
+const AppContainer = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+`;
+
+const Title = styled.h1`
+  text-align: center;
+  color: #333;
+`;
+
+const Section = styled.section`
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+`;
+
+const SectionTitle = styled.h2`
+  margin-bottom: 10px;
+  color: #555;
+`;
+
+const FileInput = styled.input`
+  display: block;
+  margin-top: 10px;
+`;
+
+const TextInput = styled.input`
+  display: block;
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+`;
+
+const Button = styled.button`
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+const Link = styled.a`
+  color: #007BFF;
+  &:hover {
+    color: #0056b3;
+  }
+`;
+
+const ConnectedStatus = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  justify-content: end;
+`;
+
+const GreenDot = styled.div`
+  width: 10px;
+  height: 10px;
+  background-color: green;
+  border-radius: 50%;
+  margin-right: 10px;
+`;
+
+const Disclaimer = styled.p`
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  color: #856404;
+`;
+
 
 const lighthouseUrl = 'https://gateway.lighthouse.storage/ipfs/';
 const litNetwork = LitNetwork.Cayenne;
@@ -51,6 +134,7 @@ const App = () => {
   const [fileHash, setUploadedFileHash] = useState('');
   const [uploading, setUploading] = useState(false);
   const [decryptedText, setDecryptedText] = useState(null);
+  const [connected, setConnected] = useState(false);
 
   const accessControlConditions = [
     {
@@ -72,6 +156,7 @@ const App = () => {
         try {
           const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
           setCurrentAccount(accounts[0]);
+          setConnected(true)
         } catch (error) {
           if (error.code === 4001) {
             // User rejected request
@@ -232,39 +317,57 @@ const App = () => {
     return results;
   };
 
+  
   return (
-      <div className="App">
-        <h1>Insurance Bot.</h1>
+    <AppContainer>
+      <Title>Insurance Bot</Title>
 
-        <p>Upload PDF to Filecoin IPFS</p>
+      <ConnectedStatus>
+        {connected && <GreenDot />}
+        <span>{connected ? 'Connected' : 'Not Connected'}</span>
+      </ConnectedStatus>
+
+      <Disclaimer>
+        In order to use this service, you need faucets from 
+        <Link href="https://faucet.litprotocol.com/" target="_blank" rel="noopener noreferrer"> Lit Faucet</Link> and 
+        <Link href="https://docs.galadriel.com/faucet" target="_blank" rel="noopener noreferrer"> Galadriel Faucet</Link>.
+      </Disclaimer>
+
+      <Section>
+        <SectionTitle>Upload PDF to Filecoin IPFS</SectionTitle>
         {fileHash && (
           <span>
             <p>File Uploaded, check here: </p>
-            <a href={`${lighthouseUrl}${fileHash}`} target="_blank" rel="noopener noreferrer">
+            <Link href={`${lighthouseUrl}${fileHash}`} target="_blank" rel="noopener noreferrer">
               Link to Filecoin IPFS
-            </a>
+            </Link>
           </span>
         )}
-        <input
+        <FileInput
           type="file"
           name="myImage"
           onChange={(event) => {
             uploadFile(event.target.files);
           }}
         />
+      </Section>
 
-        <p>Fetch PDF from Filecoin IPFS and decrypt it</p>
-        <input
+      <Section>
+        <SectionTitle>Fetch PDF from Filecoin IPFS and Decrypt It</SectionTitle>
+        <TextInput
           type="text"
           value={fileHash}
           onChange={(e) => setUploadedFileHash(e.target.value)}
           placeholder="Enter CID/Hash to decrypt"
         />
-        <button onClick={() => decryptLitAction(fileHash)}>Decrypt</button>
+        <Button onClick={() => decryptLitAction(fileHash)}>Decrypt</Button>
+      </Section>
 
-        <p>AI Insurance Agent</p>
+      <Section>
+        <SectionTitle>AI Insurance Agent</SectionTitle>
         {decryptedText && <InsuranceBot currentAccount={currentAccount} formText={decryptedText} />}
-      </div>
+      </Section>
+    </AppContainer>
   );
 };
 

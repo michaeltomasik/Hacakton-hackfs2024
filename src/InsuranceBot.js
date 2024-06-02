@@ -2,6 +2,36 @@ import { useState } from 'react';
 import { ethers } from 'ethers'; // Correct import statement
 import { ABI } from './abi'; // Ensure ABI is correctly imported
 import { findInsuranceRate } from './helper'; // Ensure helper functions are correctly imported
+import styled from 'styled-components';
+
+const Button = styled.button`
+  padding: 10px 20px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+const InsuranceRateContainer = styled.div`
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+`;
+
+const RateTitle = styled.h2`
+  margin-bottom: 10px;
+  color: #333;
+`;
+
+const EvaluationText = styled.div`
+  color: #555;
+`;
 
 const InsuranceBot = ({ formText }) => {
   const [chatId, saveChatId] = useState(1);
@@ -39,15 +69,15 @@ const InsuranceBot = ({ formText }) => {
   };
 
   if (!insuranceRate) {
-    return <button onClick={createInsuranceEvaluation}>Request Form Evaluation</button>;
+    return <Button onClick={createInsuranceEvaluation}>Request Form Evaluation</Button>;
   }
 
   return (
-    <div>
-      <h2>Insurance RATE $ {insuranceRate}</h2>
-      <div>{aiEvaluation}</div>
-    </div>
+    <InsuranceRateContainer>
+      <RateTitle>Insurance RATE $ {insuranceRate}</RateTitle>
+      <EvaluationText>{aiEvaluation}</EvaluationText>
+    </InsuranceRateContainer>
   );
 };
-
-export default InsuranceBot;
+  
+  export default InsuranceBot;
